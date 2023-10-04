@@ -65,11 +65,11 @@ router.post('/add', auth, async (req, res) => {
 
     const subject = "Order confirmation"
     
-    cartDoc.products.map((each)=>{
+    // cartDoc.products.map((each)=>{
       
-    })
+    // })
 
-    await mail(content,subject,req.user.email)
+    // await mail(content,subject,req.user.email)
   
     
 
