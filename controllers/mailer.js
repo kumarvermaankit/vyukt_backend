@@ -17,13 +17,20 @@
 // }));
 
 
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: 'bfyhelp@gmail.com', // Your Gmail email address
-        pass: 'Letschangeworld@123' // Your Gmail password or an app-specific password if you have 2-factor authentication enabled
+const transporter = nodemailer.createTransport(
+    {
+      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      auth: {
+        user: "bfyhelp@gmail.com", // generated ethereal user
+        pass: 'Letschangeworld@123', // generated ethereal password
+      },
+    },
+    {
+      from: "bfyhelp@gmail.com",
     }
-});
+  );
 
 
 const sendEmail = async options =>{
