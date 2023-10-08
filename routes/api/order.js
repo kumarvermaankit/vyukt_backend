@@ -11,6 +11,7 @@ const role = require('../../middleware/role');
 const store = require('../../utils/store');
 const mail = require("../../controllers/sendMail")
 const User = require("../../models/user")
+const sendEmail = require("../../controllers/mailer")
 
 
 router.post('/add', auth, async (req, res) => {
@@ -24,6 +25,8 @@ router.post('/add', auth, async (req, res) => {
     const address = req.body.address;
     const phoneNumber = req.body.phoneNumber
     const receipt = req.body.receipt
+    const email = req.user.email
+    const name = req.body.name
     const order = new Order({
       cart,
       user,
@@ -32,6 +35,8 @@ router.post('/add', auth, async (req, res) => {
       phoneNumber,
       receipt
     });
+
+  
 
     const orderDoc = await order.save();
 
@@ -53,13 +58,12 @@ router.post('/add', auth, async (req, res) => {
     const content = `<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
     <div style="margin:50px auto;width:70%;padding:20px 0">
       <div style="border-bottom:1px solid #eee">
-        <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Seafunk</a>
+        <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Bfy</a>
       </div>
-      <p style="font-size:1.1em">Hi,</p>
+      <p style="font-size:1.1em">Hi,${name}</p>
       <p>Thank you for choosing us. Your order with order Id ${newOrder._id} is confirmed for delivery on address ${address}</p>
-      <p style="font-size:0.9em;">Regards,<br />Team Seafunk</p>
+      <p style="font-size:0.9em;">Regards,<br />Team Bfy</p>
       <hr style="border:none;border-top:1px solid #eee" />
-      <p>${receipt}</p>
     </div>
     </div>`
 
@@ -69,22 +73,19 @@ router.post('/add', auth, async (req, res) => {
       
     // })
 
-    // await mail(content,subject,req.user.email)
-  
     
+    sendEmail({content:content,subject:subject,to:email})
+.then(()=>{
+  res.status(200).json({
+    success: true,
+    message: `Your order has been placed successfully!`,
+    order: { _id: orderDoc._id }
+  });
 
+})
+.catch((err) => console.error(err));
   
-
-
-
-    
-
-    res.status(200).json({
-      success: true,
-      message: `Your order has been placed successfully!`,
-      order: { _id: orderDoc._id }
-    });
-  } catch (error) {
+} catch (error) {
     console.log(error)
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'

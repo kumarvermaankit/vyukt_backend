@@ -17,20 +17,14 @@
 // }));
 
 
-const transporter = nodemailer.createTransport(
-    {
-      service: "gmail",
-      host: "smtp.gmail.com",
-      port: 465,
-      auth: {
-        user: "bfyhelp@gmail.com", // generated ethereal user
-        pass: 'Letschangeworld@123', // generated ethereal password
-      },
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    application: "bfy",
+    auth: {
+      user: "bfyhelp@gmail.com",
+      pass: "iqdh nmzh fzoz mftc ",
     },
-    {
-      from: "bfyhelp@gmail.com",
-    }
-  );
+  });
 
 
 const sendEmail = async options =>{
@@ -42,7 +36,7 @@ const sendEmail = async options =>{
     //2) Define the mail options
   
         const mailOptions = {
-            from:'Vyukt <help@vyukt.com>',
+            from:'Bfy <bfyhelp@gmail.com>',
             to:options.to,
             subject:options.subject,
             html:options.content
