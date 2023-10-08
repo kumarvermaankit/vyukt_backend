@@ -254,7 +254,7 @@ router.get('/me', auth, async (req, res) => {
 });
 
 // fetch order api
-router.get('/:orderId', async (req, res) => {
+router.get('/:orderId',auth, async (req, res) => {
   try {
     const orderId = req.params.orderId;
 
