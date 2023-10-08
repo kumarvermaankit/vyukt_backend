@@ -304,8 +304,9 @@ router.get('/:orderId', async (req, res) => {
       order
     });
   } catch (error) {
+    console.log(error)
     res.status(400).json({
-      error: error
+      error: 'Your request could not be processed. Please try again.'
     });
   }
 });
