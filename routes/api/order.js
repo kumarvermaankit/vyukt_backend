@@ -14,18 +14,25 @@ const User = require("../../models/user")
 const sendEmail = require("../../controllers/mailer")
 
 
-router.post('/add', auth, async (req, res) => {
+router.post('/add', async (req, res) => {
   try {
 
-    
+    console.log(req.body)
 
     const cart = req.body.cartId;
     const total = req.body.total;
-    const user = req.user._id;
+    var user = ""
+    if(req.body.tempUser){
+      user = req.body.tempUser._id
+    }
+    else{
+      user = req.user._id;
+
+    }
     const address = req.body.address;
     const phoneNumber = req.body.phoneNumber
     const receipt = req.body.receipt
-    const email = req.user.email
+    const email = req.body.email
     const name = req.body.name
     const order = new Order({
       cart,
@@ -247,7 +254,7 @@ router.get('/me', auth, async (req, res) => {
 });
 
 // fetch order api
-router.get('/:orderId', auth, async (req, res) => {
+router.get('/:orderId', async (req, res) => {
   try {
     const orderId = req.params.orderId;
 

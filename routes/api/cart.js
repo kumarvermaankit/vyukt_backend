@@ -7,9 +7,15 @@ const Product = require('../../models/product');
 const auth = require('../../middleware/auth');
 const store = require('../../utils/store');
 
-router.post('/add', auth, async (req, res) => {
-  try {
-    const user = req.user._id;
+router.post('/add', async (req, res) => {  try {
+    console.log(req.body)
+    var user = ""
+    if(req.body.tempUser){
+      user = req.body.tempUser._id
+    }
+    else{
+      user = req.user._id;
+    }
     const items = req.body.products;
 
     const products = store.caculateItemsSalesTax(items);
@@ -28,6 +34,7 @@ router.post('/add', auth, async (req, res) => {
       cartId: cartDoc.id
     });
   } catch (error) {
+    console.log(error)
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'
     });

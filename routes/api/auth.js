@@ -12,6 +12,8 @@ const User = require('../../models/user');
 const mailchimp = require('../../services/mailchimp');
 const mailgun = require('../../services/mailgun');
 const keys = require('../../config/keys');
+const sendEmail = require("../../controllers/mailer")
+
 
 const { secret, tokenLife } = keys.jwt;
 
@@ -76,7 +78,7 @@ router.post('/login', async (req, res) => {
 router.post('/register', async (req, res) => {
   console.log(req.body)
   try {
-    const { email, firstName, lastName, password, isSubscribed } = req.body;
+    var { email, firstName, lastName, password, isSubscribed } = req.body;
 
     if (!email) {
       console.log('You must enter an email address.')
@@ -100,26 +102,48 @@ router.post('/register', async (req, res) => {
 
     if (existingUser) {
       console.log("email already use")
-      return res
+      console.log(existingUser)
+      if(existingUser.avatar == "temporary"){
+
+        existingUser.avatar = "permanent";
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
+        password = hash;
+        existingUser.password = password;
+        existingUser.save();
+        const payload = {
+          id: existingUser.id
+        };
+
+        const token = jwt.sign(payload, secret, { expiresIn: tokenLife });
+        return res.status(200).json({
+          success: true,
+          token: `Bearer ${token}`,
+          user: {
+            id: existingUser.id,
+            firstName: existingUser.firstName,
+            lastName: existingUser.lastName,
+            email: existingUser.email,
+            role: existingUser.role
+          }
+        });
+      
+      }
+      else{
+        return res
         .status(400)
         .json({ error: 'That email address is already in use.' });
+      }
     }
 
-    // let subscribed = false;
-    // if (isSubscribed) {
-    //   const result = await mailchimp.subscribeToNewsletter(email);
-
-    //   if (result.status === 'subscribed') {
-    //     subscribed = true;
-    //   }
-    // }
-
+    const avatar = "permanent"
 
     const user = new User({
       email,
       password,
       firstName,
-      lastName
+      lastName,
+      avatar
     });
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(user.password, salt);
@@ -162,6 +186,101 @@ router.post('/register', async (req, res) => {
     });
   }
 });
+
+
+router.post('/tempregister', async (req, res) => {
+  try {
+    const { email, firstName, lastName} = req.body;
+    if (!email) {
+      return res
+        .status(400)
+        .json({ error: 'You must enter an email address.' });
+    }
+
+    console.log("email",email)
+
+    if (!firstName || !lastName) {
+      return res.status(400).json({ error: 'You must enter your full name.' });
+    }
+
+    // if (!password) {
+    //   return res.status(400).json({ error: 'You must enter a password.' });
+    // }
+
+    console.log("lastname",lastName)
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res
+        .status(200)
+        .json({ error: 'That email address is already in use.',user:existingUser });
+    }
+
+    // generate password fron email first portion and add @123 after that
+    const password = email.split('@')[0] + '@123';
+    const avatar = "temporary"
+    const user = new User({
+      email,
+      password,
+      firstName,
+      lastName,
+      avatar:avatar
+      
+    });
+    console.log("avatae",avatar)
+    console.log("tempuser",user)
+    
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(user.password, salt);
+
+
+    user.password = hash;
+
+    const registeredUser = await user.save();
+
+    user['role'] = registeredUser.role
+
+    const content = `<div style="font-family: Helvetica,Arial,sans-serif;min-width:1000px;overflow:auto;line-height:2">
+    <div style="margin:50px auto;width:70%;padding:20px 0">
+      <div style="border-bottom:1px solid #eee">
+        <a href="" style="font-size:1.4em;color: #00466a;text-decoration:none;font-weight:600">Bfy</a>
+      </div>
+      <p style="font-size:1.1em">Hi,</p>
+      <p>Thank you for choosing us.</p>
+      <p>Use the following id and password to sign in , you can change your password after login.</p>
+      <p>Id: ${email}</p>
+      <p>Password: ${password}</p>
+      <p style="font-size:0.9em;">Regards,<br />Team Bfy</p>
+      <hr style="border:none;border-top:1px solid #eee" />
+    </div>
+    </div>`
+
+    const subject = "Buyforyou login id and password"
+    
+    // cartDoc.products.map((each)=>{
+      
+    // })
+
+    res.status(200).json({
+      success: true,
+      message: `Thanks for registering. Please check your email for the confirmation link to complete your registration.`,
+      user: registeredUser
+    });
+
+    sendEmail({content:content,subject:subject,to:email})
+.then(()=>{
+  console.log("email sent")
+
+})
+
+  } catch (error) {
+    console.log(error)
+    res.status(400).json({
+      error: 'Your request could not be processed. Please try again.'
+    });
+  }
+})
 
 router.post('/forgot', async (req, res) => {
   try {
