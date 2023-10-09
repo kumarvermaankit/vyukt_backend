@@ -9,6 +9,7 @@ const store = require('../../utils/store');
 
 router.post('/add', async (req, res) => {  try {
     var user = ""
+    console.log(req.body)
     if(req.body.tempUser){
       user = req.body.tempUser._id
     }

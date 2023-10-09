@@ -21,19 +21,18 @@ router.post('/add', async (req, res) => {
 
     const cart = req.body.cartId;
     const total = req.body.total;
-    var user = ""
-    if(req.body.tempUser){
-      user = req.body.tempUser._id
-    }
-    else{
-      user = req.user._id;
+    // if(req.body.tempUser === true){
+      var user = req.body.user._id
+    // }
+    // else if(req.body._id){
+    //   user = req.body._id;
 
-    }
+    // }
     const address = req.body.address;
     const phoneNumber = req.body.phoneNumber
     const receipt = req.body.receipt
-    const email = req.body.email
-    const name = req.body.name
+    const email = req.body.user.email
+    const name = req.body.user.firstName
     const order = new Order({
       cart,
       user,
@@ -42,6 +41,8 @@ router.post('/add', async (req, res) => {
       phoneNumber,
       receipt
     });
+
+    console.log(order)
 
   
 

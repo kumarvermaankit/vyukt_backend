@@ -47,6 +47,11 @@ router.post('/login', async (req, res) => {
       });
     }
 
+    if(user.avatar == "temporary"){
+      user.avatar = "permanent"
+      user.save()
+    }
+
     const payload = {
       id: user.id
     };
