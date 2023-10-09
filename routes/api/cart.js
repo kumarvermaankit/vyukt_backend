@@ -8,13 +8,12 @@ const auth = require('../../middleware/auth');
 const store = require('../../utils/store');
 
 router.post('/add', async (req, res) => {  try {
-    console.log(req.body)
     var user = ""
     if(req.body.tempUser){
       user = req.body.tempUser._id
     }
-    else{
-      user = req.user._id;
+    else if(req.body.user){
+      user = req.body.user._id;
     }
     const items = req.body.products;
 
